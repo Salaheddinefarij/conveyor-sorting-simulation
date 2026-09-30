@@ -1,0 +1,14 @@
+const test=require('node:test');const assert=require('node:assert/strict');const Conveyor=require('../controller');
+const run=(c,seconds)=>{for(let i=0;i<Math.ceil(seconds/0.02);i++)c.tick();};
+test('power-up has no active outputs',()=>{let c=new Conveyor;run(c,2);assert.equal(c.state,'STOPPED');assert.equal(c.motor,false);assert.equal(c.good,0);});
+test('three items yield two accepted and one rejected',()=>{let c=new Conveyor;c.start();run(c,17);assert.equal(c.good,2);assert.equal(c.rejects,1);});
+test('feed jam causes a latched fault',()=>{let c=new Conveyor;c.jam=true;c.start();run(c,6);assert.equal(c.state,'FAULT');assert.equal(c.motor,false);assert.equal(c.good,0);c.jam=false;run(c,3);assert.equal(c.state,'FAULT');});
+test('missing inspection sensor causes timeout',()=>{let c=new Conveyor;c.sensorFailure=true;c.start();run(c,6);assert.equal(c.fault,'Inspection sensor timeout');});
+test('reset blocked while fault injection active',()=>{let c=new Conveyor;c.estop=true;c.tick();assert.equal(c.reset(),false);assert.equal(c.state,'FAULT');});
+test('reset requires separate start',()=>{let c=new Conveyor;c.estop=true;c.tick();c.estop=false;assert.equal(c.reset(),true);run(c,5);assert.equal(c.state,'STOPPED');assert.equal(c.motor,false);c.start();assert.equal(c.state,'IDLE');});
+test('stop clears in-flight item without counting',()=>{let c=new Conveyor;c.start();run(c,2);c.stop();run(c,4);assert.equal(c.position,null);assert.equal(c.good+c.rejects,0);assert.equal(c.motor,false);});
+test('stop cannot acknowledge fault',()=>{let c=new Conveyor;c.estop=true;c.tick();c.estop=false;c.stop();assert.equal(c.state,'FAULT');});
+test('mode changes blocked while running',()=>{let c=new Conveyor;c.start();assert.equal(c.setMode('MANUAL'),false);assert.equal(c.mode,'AUTO');});
+test('manual outputs only in manual and simulated estop overrides',()=>{let c=new Conveyor;c.jog=true;c.tick();assert.equal(c.motor,false);c.setMode('MANUAL');c.jog=true;c.divert=true;c.tick();assert.equal(c.motor,true);assert.equal(c.gate,true);c.estop=true;c.tick();assert.equal(c.motor,false);assert.equal(c.gate,false);});
+test('sort-stage jam times out',()=>{let c=new Conveyor;c.start();while(c.state!=='SORT')c.tick();c.jam=true;run(c,5);assert.equal(c.fault,'Exit timeout / conveyor jam');assert.equal(c.rejects+c.good,0);});
+test('invalid time step rejected',()=>{let c=new Conveyor;assert.throws(()=>c.tick(-1));assert.throws(()=>c.tick(1));});

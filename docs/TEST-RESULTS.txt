@@ -1,0 +1,22 @@
+✔ power-up has no active outputs (1.989287ms)
+✔ three items yield two accepted and one rejected (0.464289ms)
+✔ feed jam causes a latched fault (0.371881ms)
+✔ missing inspection sensor causes timeout (0.402116ms)
+✔ reset blocked while fault injection active (0.147512ms)
+✔ reset requires separate start (0.140312ms)
+✔ stop clears in-flight item without counting (0.150046ms)
+✔ stop cannot acknowledge fault (0.108484ms)
+✔ mode changes blocked while running (0.235104ms)
+✔ manual outputs only in manual and simulated estop overrides (0.250107ms)
+✔ sort-stage jam times out (0.190116ms)
+✔ invalid time step rejected (0.283236ms)
+ℹ tests 12
+ℹ suites 0
+ℹ pass 12
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 93.604731
+PASS: DOM interface smoke check: start, 2 accepted / 1 rejected, jam alarm, clear/reset/restart, manual hold/release and rendered event log. No script errors.
+Method: jsdom, not a visual browser/layout test.
